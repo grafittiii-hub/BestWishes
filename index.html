@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>心意瓶 | Heartfelt Jar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;500;700&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-font: 'Noto Serif TC', serif;
+            --handwriting-font: 'Klee One', cursive;
+        }
+        body {
+            font-family: var(--primary-font);
+            margin: 0;
+            overflow: hidden; /* 確保不捲動 */
+            height: 100dvh;
+            background: linear-gradient(135deg, #f5efe0 0%, #e8e8e8 100%);
+        }
+        /* 磨砂玻璃瓶 */
+        .glass-bottle {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.3), 0 20px 50px rgba(0,0,0,0.05);
+            border-radius: 60px 60px 20px 20px;
+            position: relative;
+            cursor: pointer;
+        }
+        .bottle-neck {
+            width: 80px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            margin: 0 auto -2px auto;
+        }
+        /* 字體微調 */
+        .premium-text { letter-spacing: 0.15em; }
+        .handwriting { font-family: var(--handwriting-font); }
+        
+        /* 隱藏捲動條 */
+        ::-webkit-scrollbar { display: none; }
+        
+        /* 儲存圖片用隱藏容器 */
+        #export-container {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 1080px;
+            height: 1440px;
+            background: #fff;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between p-8">
+
+    <div class="fixed inset-0 -z-10 opacity-40">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#ffbe98_0%,transparent_50%)] animate-pulse"></div>
+    </div>
+
+    <header class="text-center mt-4">
+        <h1 class="text-2xl font-light text-stone-700 premium-text">心意瓶</h1>
+        <p class="text-[10px] text-stone-400 uppercase tracking-[0.3em] mt-1">Heartfelt Jar</p>
+    </header>
+
+    <main id="jar-trigger" class="relative group">
+        <div class="bottle-neck"></div>
+        <div class="glass-bottle w-48 h-64 flex flex-wrap content-end p-4 gap-1 overflow-hidden transition-transform duration-500 group-hover:scale-105">
+            <div class="w-4 h-8 rounded-sm rotate-12 opacity-80" style="background: #ffbe98;"></div>
+            <div class="w-4 h-6 rounded-sm -rotate-45 opacity-60" style="background: #6667AB;"></div>
+            <div class="w-4 h-9 rounded-sm rotate-6 opacity-70" style="background: #719651;"></div>
+            <div class="w-4 h-7 rounded-sm -rotate-12 opacity-50" style="background: #B59A6D;"></div>
+            <div class="w-4 h-8 rounded-sm rotate-45 opacity-80" style="background: #F5DF4D;"></div>
+        </div>
+        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 text-stone-400 text-sm whitespace-nowrap premium-text opacity-0 group-hover:opacity-100 transition-opacity">
+            輕點瓶身抽取心意
+        </div>
+    </main>
+
+    <footer class="w-full max-w-md flex justify-around items-center mb-4">
+        <button onclick="toggleModal('history')" class="p-3 text-stone-500 hover:text-stone-800 transition-all active:scale-90">
+            <i data-lucide="archive" class="w-6 h-6"></i>
+        </button>
+        <button onclick="toggleModal('add')" class="bg-white/50 backdrop-blur-md border border-stone-200 px-8 py-3 rounded-full text-stone-600 premium-text hover:bg-white transition-all hover:shadow-lg active:scale-95">
+            寫下心意
+        </button>
+        <button onclick="toggleModal('settings')" class="p-3 text-stone-500 hover:text-stone-800 transition-all active:scale-90">
+            <i data-lucide="settings-2" class="w-6 h-6"></i>
+        </button>
+    </footer>
+
+    <div id="note-overlay" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-500">
+        <div id="note-card" class="w-[85%] max-w-sm aspect-[3/4] p-10 flex flex-col justify-between shadow-2xl rounded-sm transform scale-90 transition-transform duration-500">
+            <div class="flex justify-between items-start">
+                <div class="text-[10px] tracking-widest text-black/40 uppercase" id="card-date">2024.05.20</div>
+                <i data-lucide="heart" class="w-4 h-4 text-black/20"></i>
+            </div>
+            <div class="handwriting text-2xl text-stone-800 leading-relaxed text-center py-4" id="card-text">
+                生活雖然忙碌，但別忘了抬頭看看星空。
+            </div>
+            <div class="border-t border-black/10 pt-4 flex justify-between items-end">
+                <div>
+                    <div class="text-[10px] text-black/30 font-bold uppercase" id="card-pantone">PANTONE 13-1023</div>
+                    <div class="text-[8px] text-black/20 uppercase">Heartfelt Jar Collector</div>
+                </div>
+                <button onclick="saveAsImage()" class="p-2 bg-black/5 rounded-full hover:bg-black/10 transition-colors">
+                    <i data-lucide="download" class="w-4 h-4 text-stone-600"></i>
+                </button>
+            </div>
+        </div>
+        <button onclick="closeNote()" class="absolute top-8 right-8 text-white/50 hover:text-white">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <div id="action-modal" class="fixed inset-0 bg-stone-100 z-[60] p-8 hidden flex-col">
+        <div class="flex justify-between items-center mb-12">
+            <h2 id="modal-title" class="text-xl premium-text text-stone-700">寫下心意</h2>
+            <button onclick="toggleModal()" class="text-stone-400 hover:text-stone-800"><i data-lucide="x"></i></button>
+        </div>
+        
+        <div id="add-view" class="flex-1 flex flex-col hidden">
+            <textarea id="note-input" class="w-full flex-1 bg-transparent border-none text-2xl handwriting focus:ring-0 placeholder:text-stone-300" placeholder="在此輸入那些值得珍藏的文字..."></textarea>
+            <div class="grid grid-cols-5 gap-2 my-8">
+                <div onclick="setNoteColor('#ffbe98')" class="aspect-square bg-[#ffbe98] rounded-full cursor-pointer ring-offset-4 ring-orange-200 hover:ring-2 transition-all"></div>
+                <div onclick="setNoteColor('#6667AB')" class="aspect-square bg-[#6667AB] rounded-full cursor-pointer hover:ring-2 ring-indigo-200 transition-all"></div>
+                <div onclick="setNoteColor('#F5DF4D')" class="aspect-square bg-[#F5DF4D] rounded-full cursor-pointer hover:ring-2 ring-yellow-100 transition-all"></div>
+                <div onclick="setNoteColor('#719651')" class="aspect-square bg-[#719651] rounded-full cursor-pointer hover:ring-2 ring-green-100 transition-all"></div>
+                <div onclick="setNoteColor('#B59A6D')" class="aspect-square bg-[#B59A6D] rounded-full cursor-pointer hover:ring-2 ring-stone-200 transition-all"></div>
+            </div>
+            <button onclick="submitNote()" class="w-full py-4 bg-stone-800 text-white rounded-xl premium-text active:scale-95 transition-all">放入瓶中</button>
+        </div>
+
+        <div id="history-view" class="flex-1 overflow-y-auto hidden">
+            <div id="history-list" class="space-y-4">
+                </div>
+        </div>
+    </div>
+
+    <div id="export-container"></div>
+
+    <script>
+        // 初始化 Lucide 圖標
+        lucide.createIcons();
+
+        // 預設資料
+        let notes = JSON.parse(localStorage.getItem('heartfelt_notes')) || [
+            { text: "每一個今天都是餘生最年輕的一天。", color: "#ffbe98", pantone: "Peach Fuzz", date: "2024.01.01" },
+            { text: "溫柔是黑暗森林裡的唯一光亮。", color: "#6667AB", pantone: "Very Peri", date: "2024.02.14" }
+        ];
+        let currentColor = "#ffbe98";
+
+        // 瓶子搖動邏輯
+        const jar = document.getElementById('jar-trigger');
+        jar.addEventListener('click', () => {
+            // 搖動動畫
+            jar.style.transition = 'transform 0.1s';
+            let count = 0;
+            const interval = setInterval(() => {
+                const x = (Math.random() - 0.5) * 10;
+                const r = (Math.random() - 0.5) * 5;
+                jar.style.transform = `translate(${x}px) rotate(${r}deg)`;
+                count++;
+                if(count > 8) {
+                    clearInterval(interval);
+                    jar.style.transform = 'translate(0) rotate(0)';
+                    setTimeout(drawNote, 200);
+                }
+            }, 50);
+        });
+
+        function drawNote() {
+            const overlay = document.getElementById('note-overlay');
+            const card = document.getElementById('note-card');
+            const randomNote = notes[Math.floor(Math.random() * notes.length)];
+
+            document.getElementById('card-text').innerText = randomNote.text;
+            document.getElementById('card-pantone').innerText = `PANTONE ${randomNote.pantone || 'COLLECTOR'}`;
+            document.getElementById('card-date').innerText = randomNote.date || new Date().toLocaleDateString();
+            card.style.backgroundColor = randomNote.color;
+
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                overlay.classList.add('opacity-100');
+                card.classList.add('scale-100');
+            }, 50);
+        }
+
+        function closeNote() {
+            const overlay = document.getElementById('note-overlay');
+            overlay.classList.remove('opacity-100');
+            setTimeout(() => overlay.classList.add('hidden'), 500);
+        }
+
+        // Modal 控制
+        function toggleModal(type) {
+            const modal = document.getElementById('action-modal');
+            const addView = document.getElementById('add-view');
+            const historyView = document.getElementById('history-view');
+            
+            if(!type) {
+                modal.classList.add('hidden');
+                return;
+            }
+
+            modal.classList.remove('hidden');
+            document.getElementById('modal-title').innerText = type === 'add' ? '寫下心意' : '時光足跡';
+            
+            if(type === 'add') {
+                addView.classList.remove('hidden');
+                historyView.classList.add('hidden');
+            } else {
+                addView.classList.add('hidden');
+                historyView.classList.remove('hidden');
+                renderHistory();
+            }
+        }
+
+        function setNoteColor(color) {
+            currentColor = color;
+            // 視覺反饋：這裡可以加個選中效果
+        }
+
+        function submitNote() {
+            const text = document.getElementById('note-input').value;
+            if(!text) return;
+
+            const newNote = {
+                text,
+                color: currentColor,
+                date: new Date().toLocaleDateString(),
+                pantone: "MY MEMORY"
+            };
+            notes.push(newNote);
+            localStorage.setItem('heartfelt_notes', JSON.stringify(notes));
+            document.getElementById('note-input').value = '';
+            toggleModal();
+            // 輕微成功提示
+            alert('已放入瓶中');
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = notes.map(n => `
+                <div class="p-6 rounded-2xl flex items-center justify-between shadow-sm" style="background: ${n.color}22; border-left: 8px solid ${n.color}">
+                    <div class="flex-1">
+                        <p class="handwriting text-lg text-stone-700">${n.text}</p>
+                        <p class="text-[10px] text-stone-400 mt-2 tracking-widest">${n.date}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 儲存圖片功能
+        async function saveAsImage() {
+            const card = document.getElementById('note-card');
+            const originalShadow = card.style.boxShadow;
+            card.style.boxShadow = 'none'; // 導出時去掉外陰影更乾淨
+
+            html2canvas(card, {
+                scale: 3, // 高清
+                backgroundColor: null,
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Heartfelt-${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                card.style.boxShadow = originalShadow;
+            });
+        }
+    </script>
+</body>
+</html>
