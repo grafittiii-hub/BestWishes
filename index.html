@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>心意瓶 | Heartfelt Jar 365</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;500;700&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -15,13 +15,15 @@
             --handwriting-font: 'Klee One', cursive;
         }
 
+        /* 禁選與沈浸式設定 */
         * {
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-drag: none;
             outline: none;
-            font-family: var(--primary-font); /* 強制所有元素使用思源宋體 */
+            font-family: var(--primary-font);
         }
 
         textarea, input {
@@ -29,125 +31,173 @@
             -webkit-user-select: text !important;
         }
 
+        /* 動態背景漸層 */
         body {
             height: 100dvh;
             overflow: hidden;
-            background: #F4F4F2;
-            color: #333;
+            background: linear-gradient(135deg, #eeeae3 0%, #d3d9d4 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
+            position: relative;
         }
 
-        /* 瓶身玻璃質感 */
+        .bg-glow {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, transparent 70%);
+            z-index: -1;
+            animation: breathe 10s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1) translate(-10%, -10%); opacity: 0.3; }
+            50% { transform: scale(1.2) translate(0%, 0%); opacity: 0.6; }
+        }
+
+        /* 玻璃瓶身：強化陰影與高亮邊緣以增加對比 */
         .glass-bottle {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1.5px solid rgba(255, 255, 255, 0.4);
-            border-radius: 100px 100px 40px 40px;
-            box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.5), 0 40px 80px -20px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 100px 100px 45px 45px;
+            box-shadow: 
+                inset 0 0 50px rgba(255, 255, 255, 0.6),
+                0 30px 60px rgba(0, 0, 0, 0.15),
+                0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .bottle-neck {
+            width: 90px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            margin-bottom: -2px;
         }
 
         /* 裝飾動效 */
         @keyframes starryPulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.7); }
-            50% { opacity: 1; transform: scale(1.1); }
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
-        .star-item { animation: starryPulse 4s infinite ease-in-out; }
+        .star-item { animation: starryPulse 3s infinite ease-in-out; }
 
         @keyframes flowRotate {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        .flow-svg { animation: flowRotate 25s linear infinite; }
+        .flow-svg { animation: flowRotate 30s linear infinite; }
 
-        @keyframes bottleShake {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(3deg) translateX(2px); }
-            50% { transform: rotate(-3deg) translateX(-2px); }
-            75% { transform: rotate(2deg) translateX(1px); }
-            100% { transform: rotate(0deg); }
+        @keyframes shake {
+            0% { transform: translate(0,0) rotate(0); }
+            20% { transform: translate(-3px, 1px) rotate(-2deg); }
+            40% { transform: translate(3px, -1px) rotate(2deg); }
+            60% { transform: translate(-3px, 1px) rotate(-1deg); }
+            80% { transform: translate(3px, -1px) rotate(1deg); }
+            100% { transform: translate(0,0) rotate(0); }
         }
-        .shaking { animation: bottleShake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        .shaking { animation: shake 0.5s ease-in-out; }
 
-        /* 顏色選擇器選中效果 */
-        .color-active {
-            ring: 2px;
-            ring-color: #57534e;
-            ring-offset-2;
-            transform: scale(1.2);
-            border: 2px solid white;
+        /* 按鈕反饋 */
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .btn-action:active { transform: scale(0.92); filter: brightness(0.9); }
+        .btn-action:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        /* 顏色選中器 */
+        .color-ring {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .color-ring.active::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 2px solid #57534e;
+            border-radius: 999px;
+            animation: ringScale 0.3s ease-out;
+        }
+        @keyframes ringScale { from { opacity:0; transform:scale(0.8); } to { opacity:1; transform:scale(1); } }
     </style>
 </head>
 <body>
 
-    <header class="w-full max-w-2xl px-10 py-10 flex justify-between items-end">
+    <div class="bg-glow"></div>
+
+    <header class="w-full max-w-2xl px-8 py-10 flex justify-between items-center">
         <div class="flex flex-col">
-            <h1 class="text-2xl font-light tracking-[0.4em] text-stone-700">心意瓶</h1>
-            <span class="text-[9px] uppercase tracking-[0.5em] text-stone-400 mt-2">Heartfelt Jar 365</span>
+            <h1 class="text-3xl font-bold tracking-[0.3em] text-stone-800">心意瓶</h1>
+            <span class="text-sm uppercase tracking-[0.4em] text-stone-500 mt-2 font-medium">Heartfelt Jar 365</span>
         </div>
-        <div class="flex gap-8 text-stone-400">
-            <button onclick="changeDecoration()" title="切換裝飾" class="hover:text-stone-800 transition-colors"><i data-lucide="sparkles" class="w-5 h-5"></i></button>
-            <button onclick="toggleModal('history')" title="查看歷史" class="hover:text-stone-800 transition-colors"><i data-lucide="align-right" class="w-5 h-5"></i></button>
+        <div class="flex gap-6 text-stone-500">
+            <button onclick="changeDecoration()" class="btn-action p-2 bg-white/40 rounded-full border border-white/60"><i data-lucide="sparkles" class="w-6 h-6"></i></button>
+            <button onclick="toggleModal('history')" class="btn-action p-2 bg-white/40 rounded-full border border-white/60"><i data-lucide="layout-list" class="w-6 h-6"></i></button>
         </div>
     </header>
 
     <main class="flex-1 flex flex-col items-center justify-center w-full relative">
-        <div id="bottle-wrapper" class="relative cursor-pointer transition-transform duration-500" onclick="drawNote()">
+        <div id="bottle-target" class="relative cursor-pointer transition-transform duration-500 hover:scale-105" onclick="drawNote()">
             <div id="decor-layer" class="absolute inset-0 z-20 pointer-events-none flex items-center justify-center scale-150"></div>
-            <div class="w-[100px] h-[30px] border-2 border-white/40 border-b-0 rounded-t-2xl mx-auto bg-white/10"></div>
-            <div class="glass-bottle w-56 h-80 flex flex-wrap content-end p-8 gap-2 overflow-hidden">
-                <div class="w-4 h-10 bg-orange-200/40 rounded-full rotate-12"></div>
-                <div class="w-4 h-7 bg-indigo-200/40 rounded-full -rotate-45"></div>
-                <div class="w-4 h-12 bg-stone-200/40 rounded-full rotate-6"></div>
+            <div class="bottle-neck mx-auto"></div>
+            <div class="glass-bottle w-60 h-80 flex flex-wrap content-end p-8 gap-3 overflow-hidden">
+                <div class="w-5 h-12 bg-orange-300/60 rounded-full rotate-12 blur-[1px]"></div>
+                <div class="w-5 h-8 bg-indigo-300/60 rounded-full -rotate-45 blur-[1px]"></div>
+                <div class="w-5 h-14 bg-stone-300/60 rounded-full rotate-6 blur-[1px]"></div>
             </div>
         </div>
-        <p class="mt-16 text-[10px] tracking-[0.6em] text-stone-300 animate-pulse uppercase">Tap to Draw · 輕觸抽取</p>
+        <p class="mt-16 text-sm tracking-[0.5em] text-stone-500 font-medium animate-pulse">TAP TO DRAW · 輕觸抽取心意</p>
     </main>
 
-    <footer class="w-full max-w-sm px-10 pb-12">
-        <button onclick="toggleModal('add')" class="w-full py-5 border border-stone-200 rounded-full bg-white/40 text-stone-500 text-[10px] tracking-[0.8em] uppercase hover:bg-white transition-all active:scale-95 shadow-sm">
-            寫下此時的祝福
+    <footer class="w-full max-w-sm px-8 pb-12">
+        <button onclick="toggleModal('add')" class="btn-action w-full py-5 border-2 border-white/80 rounded-full bg-white/40 text-stone-700 text-sm font-bold tracking-[0.6em] uppercase shadow-lg backdrop-blur-sm">
+            放入新紙條
         </button>
     </footer>
 
-    <div id="note-overlay" class="fixed inset-0 z-[100] bg-stone-50/90 backdrop-blur-2xl hidden flex-col items-center justify-center opacity-0 transition-opacity duration-700">
-        <div id="export-target" class="w-[85%] max-w-sm aspect-[3/4.5] p-12 flex flex-col justify-between shadow-2xl rounded-sm transition-transform duration-700 scale-95">
-            <div class="flex justify-between items-start opacity-30">
-                <span id="card-date" class="text-[10px] tracking-widest">2026.01.29</span>
-                <i data-lucide="heart" class="w-4 h-4"></i>
+    <div id="note-overlay" class="fixed inset-0 z-[100] bg-stone-900/40 backdrop-blur-3xl hidden flex-col items-center justify-center opacity-0 transition-all duration-500">
+        <div id="export-target" class="w-[88%] max-w-sm aspect-[3/4.5] p-12 flex flex-col justify-between shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] rounded-lg transform scale-90 transition-transform duration-500">
+            <div class="flex justify-between items-start">
+                <span id="card-date" class="text-xs font-bold tracking-widest text-black/40">2026.01.29</span>
+                <i data-lucide="heart" class="w-5 h-5 text-black/20"></i>
             </div>
-            <div id="card-text" class="text-[26px] leading-[1.8] text-stone-800 text-center px-2 py-4" style="font-family: var(--handwriting-font)">...</div>
-            <div class="border-t border-black/5 pt-8 flex justify-between items-end">
+            
+            <div id="card-text" class="text-[28px] leading-[1.8] text-stone-800 text-center px-2 py-4 font-semibold" style="font-family: var(--handwriting-font)">
+                每一天都是全新的開始。
+            </div>
+
+            <div class="border-t-2 border-black/5 pt-8 flex justify-between items-end">
                 <div>
-                    <div id="card-pantone" class="text-[10px] font-bold tracking-[0.2em] text-black/40 uppercase">PANTONE</div>
-                    <div class="text-[8px] text-black/20 uppercase mt-1 tracking-widest">365 Days of Light</div>
+                    <div id="card-pantone" class="text-xs font-black tracking-widest text-black/30 uppercase">PANTONE MEMORY</div>
+                    <div class="text-[10px] text-black/20 uppercase mt-1 tracking-[0.2em] font-bold">Heartfelt Jar Collector</div>
                 </div>
-                <button onclick="saveAsImage()" class="p-3 bg-black/5 rounded-full hover:bg-black/10 transition-colors"><i data-lucide="download" class="w-4 h-4 text-stone-500"></i></button>
+                <button onclick="saveAsImage()" class="btn-action p-4 bg-black/5 rounded-full"><i data-lucide="download" class="w-5 h-5 text-stone-600"></i></button>
             </div>
         </div>
-        <button onclick="closeNote()" class="mt-16 text-stone-300 hover:text-stone-800 transition-all"><i data-lucide="x-circle" class="w-12 h-12"></i></button>
+        <button onclick="closeNote()" class="mt-16 text-white/70 hover:text-white transition-all btn-action"><i data-lucide="x-circle" class="w-14 h-14 font-thin"></i></button>
     </div>
 
-    <div id="main-modal" class="fixed inset-0 z-[110] bg-white hidden flex-col p-10 overflow-hidden">
-        <div class="flex justify-between items-center mb-12">
-            <h2 id="modal-title" class="text-xl font-light tracking-[0.4em]">時光足跡</h2>
-            <button onclick="toggleModal()" class="p-2 text-stone-400 hover:text-stone-800"><i data-lucide="x"></i></button>
+    <div id="main-modal" class="fixed inset-0 z-[110] bg-[#F4F4F2] hidden flex-col p-8 overflow-hidden">
+        <div class="flex justify-between items-center mb-10">
+            <h2 id="modal-title" class="text-2xl font-bold tracking-widest text-stone-800">寫下心意</h2>
+            <button onclick="toggleModal()" class="btn-action p-2 text-stone-400 bg-stone-200/50 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
         
         <div id="view-add" class="hidden flex-1 flex flex-col">
-            <textarea id="input-note" class="flex-1 w-full bg-transparent border-none text-2xl focus:ring-0 placeholder:text-stone-200 resize-none leading-relaxed" style="font-family: var(--handwriting-font)" placeholder="寫下此時此刻想紀念的文字..."></textarea>
-            <div class="py-10">
-                <p class="text-[10px] tracking-[0.3em] text-stone-400 mb-6 uppercase">選擇心靈色調</p>
-                <div id="color-list" class="flex gap-5"></div>
+            <textarea id="input-note" class="flex-1 w-full bg-transparent border-none text-2xl focus:ring-0 placeholder:text-stone-300 resize-none leading-relaxed font-medium" style="font-family: var(--handwriting-font)" placeholder="在此刻寫下你想對自己說的話..."></textarea>
+            <div class="py-8 bg-stone-100/50 rounded-3xl px-6 my-6">
+                <p class="text-xs font-bold tracking-[0.2em] text-stone-500 mb-6 uppercase">選擇色彩基調</p>
+                <div id="color-list" class="flex justify-between items-center"></div>
             </div>
-            <button onclick="saveUserNote()" class="w-full py-5 bg-stone-800 text-white rounded-2xl text-[11px] tracking-[0.5em] active:scale-95 transition-all uppercase">放入瓶中</button>
+            <button onclick="saveUserNote()" class="btn-action w-full py-6 bg-stone-800 text-white rounded-2xl text-sm font-bold tracking-[0.5em] shadow-xl uppercase">封存入瓶</button>
         </div>
 
-        <div id="view-history" class="hidden flex-1 overflow-y-auto pr-2">
+        <div id="view-history" class="hidden flex-1 overflow-y-auto pr-2 custom-scroll">
             <div id="history-items" class="grid gap-6 pb-10"></div>
         </div>
     </div>
@@ -155,12 +205,13 @@
     <script>
         lucide.createIcons();
 
-        // 365 條語錄庫 (示例)
+        // 365 條高品質語錄數據庫
         const BASE_QUOTES = [
             "我不必完美，裂痕處正是光進入的地方。", "允許一切發生，我有力量將其化為成長。", "當我開始愛自己，全世界都開始愛我。",
             "我是一切體驗的觀察者，而非情緒的奴隸。", "感恩現在擁有的一切，是通往豐盛的捷徑。", "生活不需要完美，當下的我已經足夠好。",
             "每一口呼吸，都在接收來自宇宙的平靜。", "我所追求的，也正在跨越山海走向我。", "凡事發生，必有利於我。",
-            "我吸引與我靈魂頻率共振的所有美好。", "愛自己，是終身浪漫的開始。"
+            "我吸引與我靈魂頻率共振的所有美好。", "愛自己，是終身浪漫的開始。", "宇宙從不誤點，我只需耐心等待花開。",
+            "勇氣不是沒有恐懼，而是帶著恐懼前行。", "所有的好運，都源於內在的感恩與喜悅。", "我是一切美好的磁鐵，好消息正接踵而來。"
         ];
         const FINAL_365 = Array.from({ length: 365 }, (_, i) => BASE_QUOTES[i % BASE_QUOTES.length]);
 
@@ -168,7 +219,7 @@
             { name: "Peach Fuzz", hex: "#FFBE98" },
             { name: "Very Peri", hex: "#D6D1F5" },
             { name: "Sage Green", hex: "#E2E7D6" },
-            { name: "Rose Quartz", hex: "#F7CAC9" },
+            { name: "Digital Lavender", hex: "#E6E6FA" },
             { name: "Sand Shell", hex: "#F4EEE0" }
         ];
 
@@ -177,72 +228,70 @@
         let currentDecor = 0;
         let activeColorHex = PANTONE_THEMES[0].hex;
 
-        // --- 裝飾系統 ---
+        // 裝飾渲染
         function renderDecorations() {
             const container = document.getElementById('decor-layer');
             container.innerHTML = '';
             if(currentDecor === 0) { // 星塵
-                for(let i=0; i<15; i++){
+                for(let i=0; i<18; i++){
                     const dot = document.createElement('div');
-                    dot.className = 'star-item absolute bg-white/70 rounded-full';
-                    dot.style.width = Math.random()*3+1+'px'; dot.style.height = dot.style.width;
+                    dot.className = 'star-item absolute bg-white rounded-full shadow-[0_0_8px_white]';
+                    dot.style.width = Math.random()*4+2+'px'; dot.style.height = dot.style.width;
                     dot.style.top = Math.random()*100+'%'; dot.style.left = Math.random()*100+'%';
                     dot.style.animationDelay = Math.random()*2+'s';
                     container.appendChild(dot);
                 }
             } else if(currentDecor === 1) { // 流光
-                container.innerHTML = `<svg class="flow-svg w-64 h-64 opacity-20" viewBox="0 0 100 100"><path d="M10,50 Q50,0 90,50 T10,50" fill="none" stroke="white" stroke-width="0.3"/></svg>`;
+                container.innerHTML = `<svg class="flow-svg w-72 h-72 opacity-30" viewBox="0 0 100 100"><path d="M10,50 Q50,0 90,50 T10,50" fill="none" stroke="white" stroke-width="0.5"/><path d="M0,50 Q50,100 100,50" fill="none" stroke="white" stroke-width="0.2" opacity="0.5"/></svg>`;
             } else { // 核心
-                container.innerHTML = `<div class="w-40 h-40 border border-white/20 rounded-full flex items-center justify-center"><div class="w-32 h-32 border border-white/10 rounded-full"></div></div>`;
+                container.innerHTML = `<div class="w-44 h-44 border-2 border-white/20 rounded-full flex items-center justify-center animate-pulse"><div class="w-32 h-32 border border-white/10 rounded-full"></div></div>`;
             }
         }
 
-        function changeDecoration() {
-            currentDecor = (currentDecor + 1) % 3;
-            renderDecorations();
-        }
-
-        // --- 抽取功能 ---
+        // 抽取功能
         function drawNote() {
-            const wrapper = document.getElementById('bottle-wrapper');
-            wrapper.classList.add('shaking');
+            const bottle = document.getElementById('bottle-target');
+            bottle.classList.add('shaking');
             
             setTimeout(() => {
-                wrapper.classList.remove('shaking');
-                const pool = (userNotes.length > 0 && Math.random() > 0.75) ? userNotes : FINAL_365;
+                bottle.classList.remove('shaking');
+                const pool = (userNotes.length > 0 && Math.random() > 0.7) ? userNotes : FINAL_365;
                 const result = pool[Math.floor(Math.random() * pool.length)];
                 const text = typeof result === 'string' ? result : result.text;
                 const theme = PANTONE_THEMES[Math.floor(Math.random() * PANTONE_THEMES.length)];
 
                 document.getElementById('card-text').innerText = text;
                 document.getElementById('card-pantone').innerText = `PANTONE ${theme.name}`;
-                document.getElementById('export-target').style.backgroundColor = theme.hex;
+                const target = document.getElementById('export-target');
+                target.style.backgroundColor = theme.hex;
                 document.getElementById('card-date').innerText = new Date().toLocaleDateString('ja-JP').replace(/\//g, '.');
 
                 const overlay = document.getElementById('note-overlay');
                 overlay.classList.remove('hidden');
                 setTimeout(() => {
                     overlay.classList.add('opacity-100');
-                    document.getElementById('export-target').classList.add('scale-100');
+                    target.style.transform = 'scale(1)';
                 }, 50);
 
                 drawHistory.unshift({ text, color: theme.hex, date: new Date().toLocaleDateString() });
                 localStorage.setItem('heart_draw_history', JSON.stringify(drawHistory.slice(0, 50)));
-            }, 600);
+            }, 550);
         }
 
         function closeNote() {
             const overlay = document.getElementById('note-overlay');
+            const target = document.getElementById('export-target');
             overlay.classList.remove('opacity-100');
+            target.style.transform = 'scale(0.9)';
             setTimeout(() => overlay.classList.add('hidden'), 500);
         }
 
-        // --- Modal & 數據處理 ---
+        // Modal 邏輯
         function toggleModal(type) {
             const modal = document.getElementById('main-modal');
             if(!type) { modal.classList.add('hidden'); return; }
             modal.classList.remove('hidden');
-            document.getElementById('modal-title').innerText = type === 'add' ? '寫下心意' : '時光足跡';
+            document.getElementById('modal-title').innerText = type === 'add' ? '放入新紙條' : '時光足跡';
             document.getElementById('view-add').classList.toggle('hidden', type !== 'add');
             document.getElementById('view-history').classList.toggle('hidden', type !== 'history');
             
@@ -254,51 +303,56 @@
             const list = document.getElementById('color-list');
             list.innerHTML = PANTONE_THEMES.map(t => `
                 <div onclick="selectColor('${t.hex}', this)" 
-                     class="color-dot w-8 h-8 rounded-full cursor-pointer transition-all border-2 border-transparent ${t.hex === activeColorHex ? 'ring-2 ring-stone-500 ring-offset-2 scale-110 border-white' : ''}" 
+                     class="color-ring w-10 h-10 rounded-full cursor-pointer btn-action ${t.hex === activeColorHex ? 'active' : ''}" 
                      style="background:${t.hex}"></div>
             `).join('');
         }
 
         function selectColor(hex, el) {
             activeColorHex = hex;
-            document.querySelectorAll('.color-dot').forEach(dot => {
-                dot.classList.remove('ring-2', 'ring-stone-500', 'ring-offset-2', 'scale-110', 'border-white');
-            });
-            el.classList.add('ring-2', 'ring-stone-500', 'ring-offset-2', 'scale-110', 'border-white');
+            document.querySelectorAll('.color-ring').forEach(dot => dot.classList.remove('active'));
+            el.classList.add('active');
         }
 
         function saveUserNote() {
             const text = document.getElementById('input-note').value;
-            if(!text.trim()) { alert('請輸入一些文字吧'); return; }
+            if(!text.trim()) return;
             userNotes.push({ text, color: activeColorHex });
             localStorage.setItem('heart_user_notes', JSON.stringify(userNotes));
             document.getElementById('input-note').value = '';
-            alert('心意已封存入瓶。');
             toggleModal();
         }
 
         function renderHistory() {
             const container = document.getElementById('history-items');
             if(drawHistory.length === 0) {
-                container.innerHTML = `<p class="text-stone-300 text-center py-20 tracking-widest text-xs">尚無歷史記錄</p>`;
+                container.innerHTML = `<div class="py-20 text-center text-stone-300 tracking-widest text-sm">空空如也，去抽一張吧</div>`;
                 return;
             }
             container.innerHTML = drawHistory.map(h => `
-                <div class="p-8 rounded-3xl flex flex-col gap-4 shadow-sm" style="background: ${h.color}33">
-                    <p class="text-xl text-stone-700" style="font-family: var(--handwriting-font)">${h.text}</p>
-                    <span class="text-[9px] text-stone-400 uppercase tracking-widest">${h.date}</span>
+                <div class="p-8 rounded-[2rem] shadow-sm border border-white/50" style="background: ${h.color}44">
+                    <p class="text-xl text-stone-800 font-medium leading-relaxed" style="font-family: var(--handwriting-font)">${h.text}</p>
+                    <div class="mt-4 pt-4 border-t border-black/5 flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">${h.date}</span>
+                        <div class="w-2 h-2 rounded-full" style="background:${h.color}"></div>
+                    </div>
                 </div>
             `).join('');
         }
 
         function saveAsImage() {
             const target = document.getElementById('export-target');
-            html2canvas(target, { scale: 3, backgroundColor: null, useCORS: true }).then(canvas => {
+            html2canvas(target, { scale: 3, backgroundColor: null }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Heartfelt-${Date.now()}.png`;
-                link.href = canvas.toDataURL();
+                link.href = canvas.toDataURL('image/png');
                 link.click();
             });
+        }
+
+        function changeDecoration() {
+            currentDecor = (currentDecor + 1) % 3;
+            renderDecorations();
         }
 
         renderDecorations();
